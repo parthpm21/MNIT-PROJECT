@@ -1,6 +1,3 @@
-# Khatu Shayam ji Sign Up page
-
-This is a code bundle for Khatu Shayam ji Sign Up page. The original project is available at https://www.figma.com/design/ayPhnHK4zF7ytgf7kpTfqK/Khatu-Shayam-ji-Sign-Up-page.
 
 ## Tech stack
 
