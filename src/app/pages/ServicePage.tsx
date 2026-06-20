@@ -183,11 +183,15 @@ export function ServicePage() {
                 <Calendar size={14} color={C.orange} /> Booking available daily
               </div>
               <button className="w-full py-3 rounded-full text-sm font-bold text-white transition-all hover:opacity-90"
-                style={{ backgroundColor: C.orange, boxShadow: `0 4px 14px rgba(247,148,29,0.40)` }}>
+                style={{ backgroundColor: C.orange, boxShadow: `0 4px 14px rgba(247,148,29,0.40)` }}
+                onClick={() => { if (slug === "darshan-pass") navigate("/darshan-booking"); }}
+              >
                 Proceed to Book
               </button>
               <button className="w-full py-2.5 rounded-full text-xs font-semibold transition-all"
-                style={{ border: `1.5px solid ${C.darkBlue}`, color: C.darkBlue, backgroundColor: C.white }}>
+                style={{ border: `1.5px solid ${C.darkBlue}`, color: C.darkBlue, backgroundColor: C.white }}
+                onClick={() => navigate("/help")}
+              >
                 Need Help? Contact Us
               </button>
             </div>

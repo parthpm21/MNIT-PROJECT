@@ -10,6 +10,7 @@ import { GalleryPage } from "./pages/GalleryPage";
 import { GalleryVideosPage } from "./pages/GalleryVideosPage";
 import { GalleryVirtualTourPage } from "./pages/GalleryVirtualTourPage";
 import { SiteMapPage } from "./pages/SiteMapPage";
+import { DarshanBookingPage } from "./pages/DarshanBookingPage";
 
 export const router = createBrowserRouter([
   { path: "/", Component: HomePage },
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
   { path: "/mela-map", Component: MelaMapPage },
   { path: "/help", Component: HelpSupportPage },
   { path: "/live-darshan", Component: LiveDarshanPage },
+  { path: "/darshan-booking", Component: DarshanBookingPage },
   { path: "/services/donation-portal", Component: DonationPage },
   { path: "/services/:slug", Component: ServicePage },
   { path: "*", Component: HomePage },
