@@ -720,25 +720,25 @@ function MethodTab({ active, onClick, icon, label }: { active: boolean; onClick:
     </button>
   );
 }
-function DarkInput({ label, icon, type, placeholder }: { label: string; icon: React.ReactNode; type: string; placeholder: string }) {
+function DarkInput({ label, icon, type, placeholder, value, onChange }: { label: string; icon: React.ReactNode; type: string; placeholder: string; value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
   return (
     <div>
       <label className="block mb-1" style={{ color: C.textMuted, fontSize: "0.72rem", fontWeight: 500 }}>{label}</label>
       <div className="flex items-center rounded-lg border px-3 gap-2" style={{ borderColor: C.border, backgroundColor: C.inputBg }}>
         {icon}
-        <input type={type} placeholder={placeholder} className="flex-1 py-2 outline-none text-sm bg-transparent" style={{ color: C.darkText }} />
+        <input type={type} placeholder={placeholder} className="flex-1 py-2 outline-none text-sm bg-transparent" style={{ color: C.darkText }} value={value} onChange={onChange} />
       </div>
     </div>
   );
 }
 
-function PasswordField({ label, placeholder, show, toggle }: { label: string; placeholder: string; show: boolean; toggle: () => void }) {
+function PasswordField({ label, placeholder, show, toggle, value, onChange }: { label: string; placeholder: string; show: boolean; toggle: () => void; value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
   return (
     <div>
       <label className="block mb-1" style={{ color: C.textMuted, fontSize: "0.72rem", fontWeight: 500 }}>{label}</label>
       <div className="flex items-center rounded-lg border px-3 gap-2" style={{ borderColor: C.border, backgroundColor: C.inputBg }}>
         <Lock size={15} color={C.orange} />
-        <input type={show ? "text" : "password"} placeholder={placeholder} className="flex-1 py-2 outline-none text-sm bg-transparent" style={{ color: C.darkText }} />
+        <input type={show ? "text" : "password"} placeholder={placeholder} className="flex-1 py-2 outline-none text-sm bg-transparent" style={{ color: C.darkText }} value={value} onChange={onChange} />
         <button type="button" onClick={toggle} style={{ color: C.textMuted, lineHeight: 0 }}>
           {show ? <EyeOff size={14} /> : <Eye size={14} />}
         </button>

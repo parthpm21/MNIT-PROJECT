@@ -43,6 +43,64 @@ export function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const setLang = (l: "en" | "hi") => i18n.changeLanguage(l);
+
+  // Live Weather Logic
+  const [weatherTemp, setWeatherTemp] = useState<string>("24°C");
+  const [weatherCode, setWeatherCode] = useState<number>(0);
+
+  useEffect(() => {
+    async function fetchWeather() {
+      try {
+        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=27.3667&longitude=75.4000&current=temperature_2m,weather_code");
+        if (res.ok) {
+          const data = await res.json();
+          setWeatherTemp(`${Math.round(data.current.temperature_2m)}°C`);
+          setWeatherCode(data.current.weather_code);
+        }
+      } catch (err) {
+        console.error("Error fetching weather:", err);
+      }
+    }
+    fetchWeather();
+  }, []);
+
+  const weatherInfo = useMemo(() => {
+    let descEn = "Clear sky";
+    let descHi = "साफ आसमान";
+    let iconName = "sun";
+
+    const code = weatherCode;
+    if (code === 0) {
+      descEn = "Clear sky";
+      descHi = "साफ आसमान";
+      iconName = "sun";
+    } else if (code >= 1 && code <= 3) {
+      descEn = "Partly cloudy";
+      descHi = "आंशिक बादल";
+      iconName = "cloud-sun";
+    } else if (code === 45 || code === 48) {
+      descEn = "Foggy";
+      descHi = "कोहरा";
+      iconName = "cloud";
+    } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
+      descEn = "Rainy";
+      descHi = "बारिश";
+      iconName = "cloud-rain";
+    } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
+      descEn = "Snowy";
+      descHi = "बर्फबारी";
+      iconName = "cloud";
+    } else if (code >= 95) {
+      descEn = "Thunderstorm";
+      descHi = "आंधी-तूफान";
+      iconName = "cloud-lightning";
+    }
+
+    return {
+      desc: lang === "hi" ? `${descHi}, खाटू` : `${descEn}, Khatu`,
+      iconName
+    };
+  }, [weatherCode, lang]);
   
   const isLoggedIn = !!localStorage.getItem("token");
 
@@ -445,7 +503,8 @@ export function HomePage() {
             {t('hero.desc')}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => navigate("/darshan-booking")} className="px-7 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:opacity-90"
+            <button onClick={() => navigate("/darshan-booking")}
+              className="px-7 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:opacity-90"
               style={{ backgroundColor: C.orange, boxShadow: `0 4px 18px rgba(247,148,29,0.45)` }}>
               {t('hero.bookBtn')}
             </button>
