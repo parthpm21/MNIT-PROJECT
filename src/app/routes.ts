@@ -14,6 +14,7 @@ import { DarshanBookingPage } from "./pages/DarshanBookingPage";
 import { AdminPage } from "./pages/AdminPage";
 import { AnnadaanPage } from "./pages/AnnadaanPage";
 import { AboutTemplePage } from "./pages/AboutTemplePage";
+import { TempleTimingsPage } from "./pages/TempleTimingsPage";
 
 export const router = createBrowserRouter([
   { path: "/", Component: HomePage },
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
   { path: "/services/donation-portal", Component: DonationPage },
   { path: "/services/annadaan-seva", Component: AnnadaanPage },
   { path: "/services/about-temple", Component: AboutTemplePage },
+  { path: "/services/temple-timings", Component: TempleTimingsPage },
   { path: "/services/:slug", Component: ServicePage },
   { path: "*", Component: HomePage },
 ]);

@@ -154,7 +154,6 @@ export function HomePage() {
   ];
 
   const HISTORY_SUB_ITEMS = [
-    { label: "About Temple",   icon: <InfoIcon  size={15} color={C.orange}   />, slug: "about-temple" },
     { label: "Temple History", icon: <BookOpen  size={15} color={C.darkBlue} />, slug: "temple-history" },
     { label: "About Khatu",    icon: <MapPinned size={15} color={C.green}    />, slug: "about-khatu" },
   ];
