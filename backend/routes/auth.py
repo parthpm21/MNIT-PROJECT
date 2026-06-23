@@ -42,6 +42,7 @@ def _format_user(user: User) -> UserResponse:
         name=user.name,
         created_at=user.created_at,
         last_login=user.last_login,
+        is_admin=user.is_admin,
     )
 
 
