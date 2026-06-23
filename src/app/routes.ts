@@ -18,6 +18,7 @@ import { VehicleRegistrationPage } from "./pages/VehicleRegistrationPage";
 import { AboutTemplePage } from "./pages/AboutTemplePage";
 import { TempleTimingsPage } from "./pages/TempleTimingsPage";
 import { TempleHistoryPage } from "./pages/TempleHistoryPage";
+import { ImportantDaysPage } from "./pages/ImportantDaysPage";
 
 export const router = createBrowserRouter([
   { path: "/", Component: HomePage },
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
   { path: "/services/about-temple", Component: AboutTemplePage },
   { path: "/services/temple-timings", Component: TempleTimingsPage },
   { path: "/services/temple-history", Component: TempleHistoryPage },
+  { path: "/services/important-days", Component: ImportantDaysPage },
   { path: "/services/:slug", Component: ServicePage },
   { path: "*", Component: HomePage },
 ]);
