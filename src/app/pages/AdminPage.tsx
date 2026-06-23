@@ -1209,6 +1209,14 @@ function Announcements() {
   const [items, setItems] = useState(ANN_INIT);
   const [newText, setNew] = useState("");
 
+  /* ── Alert sender state ────────────────────────────────── */
+  const [alertMsg, setAlertMsg] = useState("");
+  const [alertSev, setAlertSev] = useState<"info" | "warning" | "critical">("info");
+  const [alertSending, setAlertSending] = useState(false);
+  const [alertDone, setAlertDone] = useState(false);
+  const [alertError, setAlertError] = useState("");
+  const [alertHistory, setAlertHistory] = useState<{ msg: string; sev: string; time: string; recipients: number }[]>([]);
+
   function toggle(id: string) { setItems(p => p.map(a => a.id === id ? { ...a, active: !a.active } : a)); }
   function remove(id: string) { setItems(p => p.filter(a => a.id !== id)); }
   function add() {
@@ -1217,9 +1225,134 @@ function Announcements() {
     setNew("");
   }
 
+  async function sendAlert() {
+    if (!alertMsg.trim()) return;
+    setAlertSending(true);
+    setAlertError("");
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/alerts/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: alertMsg.trim(), severity: alertSev }),
+      });
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const data = await res.json();
+      setAlertHistory(prev => [
+        { msg: alertMsg.trim(), sev: alertSev, time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }), recipients: data.recipients ?? 0 },
+        ...prev,
+      ]);
+      setAlertMsg("");
+      setAlertDone(true);
+      setTimeout(() => setAlertDone(false), 2500);
+    } catch (err: unknown) {
+      setAlertError(err instanceof Error ? err.message : "Failed to send alert");
+    } finally {
+      setAlertSending(false);
+    }
+  }
+
+  const SEV_CFG = {
+    info:     { color: C.darkBlue, label: "ℹ️  Info",     desc: "General information" },
+    warning:  { color: C.orange,   label: "⚠️  Warning",  desc: "Important notice" },
+    critical: { color: C.red,      label: "🚨 Critical",  desc: "Urgent / emergency" },
+  };
+
   return (
     <div>
       <Head title="Announcement Manager" sub="Control the scrolling ticker shown on the Home page." />
+
+      {/* ══ SEND LIVE ALERT ══════════════════════════════════ */}
+      <div className="bg-white rounded-2xl p-5 mb-6" style={{ border: `2px solid ${C.darkBlue}22`, boxShadow: `0 4px 20px ${C.darkBlue}08` }}>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.darkBlue}, #2a3fa8)` }}>
+            <Send size={14} color="white" />
+          </div>
+          <div>
+            <p className="text-sm font-extrabold" style={{ color: C.text }}>Send Live Alert to Users</p>
+            <p className="text-[10px]" style={{ color: C.muted }}>Broadcast a real-time notification to all active visitors</p>
+          </div>
+        </div>
+
+        {/* Severity selector */}
+        <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: C.muted }}>Alert Severity</p>
+        <div className="flex gap-2 mb-4">
+          {(["info", "warning", "critical"] as const).map(sev => {
+            const cfg = SEV_CFG[sev];
+            const active = alertSev === sev;
+            return (
+              <button key={sev} onClick={() => setAlertSev(sev)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold border-2 transition-all"
+                style={{
+                  backgroundColor: active ? `${cfg.color}12` : "white",
+                  borderColor: active ? cfg.color : C.border,
+                  color: active ? cfg.color : C.muted,
+                }}>
+                <span className="block">{cfg.label}</span>
+                <span className="text-[9px] font-normal opacity-70">{cfg.desc}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Message input */}
+        <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: C.muted }}>Alert Message</p>
+        <textarea
+          rows={3}
+          value={alertMsg}
+          onChange={e => setAlertMsg(e.target.value)}
+          placeholder="e.g. Heavy crowd expected tomorrow — please plan your visit accordingly"
+          className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none mb-3"
+          style={{ border: `1.5px solid ${C.border}`, color: C.text, backgroundColor: C.cream }}
+          onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) sendAlert(); }}
+        />
+
+        {alertError && (
+          <p className="text-xs font-semibold mb-3 flex items-center gap-1.5" style={{ color: C.red }}>
+            <AlertCircle size={13} />{alertError}
+          </p>
+        )}
+
+        {/* Send button */}
+        <button
+          onClick={sendAlert}
+          disabled={alertSending || !alertMsg.trim()}
+          className="w-full py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all"
+          style={{
+            background: alertDone
+              ? C.green
+              : alertSending
+                ? "#666"
+                : `linear-gradient(90deg, ${SEV_CFG[alertSev].color}, ${alertSev === "info" ? "#2a3fa8" : alertSev === "warning" ? "#F59E0B" : "#EF4444"})`,
+            cursor: alertSending ? "wait" : !alertMsg.trim() ? "not-allowed" : "pointer",
+            opacity: !alertMsg.trim() && !alertSending ? 0.5 : 1,
+          }}>
+          {alertDone
+            ? <><CheckCircle2 size={15} />Alert Sent Successfully!</>
+            : alertSending
+              ? <><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Sending…</>
+              : <><Send size={14} />Send Alert to All Users</>}
+        </button>
+
+        <p className="text-[10px] text-center mt-2" style={{ color: C.muted }}>Ctrl + Enter to send  •  Alert will appear instantly on all user screens</p>
+
+        {/* Sent history */}
+        {alertHistory.length > 0 && (
+          <div className="mt-5 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: C.muted }}>Recently Sent Alerts</p>
+            <div className="flex flex-col gap-2">
+              {alertHistory.slice(0, 5).map((h, i) => (
+                <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
+                  <span className="text-xs">{h.sev === "info" ? "ℹ️" : h.sev === "warning" ? "⚠️" : "🚨"}</span>
+                  <p className="flex-1 text-xs font-medium truncate" style={{ color: C.text }}>{h.msg}</p>
+                  <span className="text-[10px] flex-shrink-0" style={{ color: C.muted }}>{h.recipients} users · {h.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ══ TICKER ANNOUNCEMENTS (existing) ══════════════════ */}
       <div className="bg-white rounded-2xl p-5 mb-5" style={{ border: `1px solid ${C.border}` }}>
         <p className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: C.muted }}>Add New Announcement</p>
         <div className="flex gap-3">
