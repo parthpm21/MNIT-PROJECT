@@ -24,6 +24,7 @@ import { NewsEventsPage } from "./pages/NewsEventsPage";
 import { AboutKhatuPage } from "./pages/AboutKhatuPage";
 import { LostFoundPage } from "./pages/LostFoundPage";
 import { ReportLostItemPage } from "./pages/ReportLostItemPage";
+import { MedicalCampPermissionPage } from "./pages/MedicalCampPermissionPage";
 
 export const router = createBrowserRouter([
   { path: "/", Component: HomePage },
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
   { path: "/services/donation-portal", Component: DonationPage },
   { path: "/services/annadaan-seva", Component: AnnadaanPage },
   { path: "/services/bandhara-permission", Component: BandharaPermissionPage },
+  { path: "/services/medical-camp", Component: MedicalCampPermissionPage },
   { path: "/services/vehicle-registration", Component: VehicleRegistrationPage },
   { path: "/services/vehicle-permits/apply", Component: VehiclePermitApplicationPage },
   { path: "/services/about-temple", Component: AboutTemplePage },
