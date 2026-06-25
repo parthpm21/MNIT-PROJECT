@@ -47,6 +47,24 @@ const ITEMS: GalleryItem[] = [
   { id: 18, url: "https://images.unsplash.com/photo-1718476971217-677d43112daa?auto=format&fit=crop&w=900&q=80", title: "Candles of Devotion", category: "Aarti & Rituals", photographer: "Rahul Saraf" },
   { id: 19, url: "https://images.unsplash.com/photo-1625069111882-7735b7b95721?auto=format&fit=crop&w=900&q=80", title: "Inner Sanctum", category: "Temple", photographer: "Yash Parashar" },
   { id: 20, url: "https://images.unsplash.com/photo-1663154048558-2510385fee89?auto=format&fit=crop&w=900&q=80", title: "Crowd of Bhakts", category: "Festivals", photographer: "Pramod Tiwari" },
+  { id: 21, url: "/Gallery_photos/gallery-01.jpeg", title: "Temple Darshan", category: "Temple", photographer: "Temple Trust" },
+  { id: 22, url: "/Gallery_photos/gallery-02.jpeg", title: "Sacred Panorama", category: "Temple", photographer: "Temple Trust" },
+  { id: 23, url: "/Gallery_photos/gallery-03.jpeg", title: "Devotional Moment", category: "Devotees", photographer: "Temple Trust" },
+  { id: 24, url: "/Gallery_photos/gallery-04.jpeg", title: "Temple Grounds", category: "Temple", photographer: "Temple Trust" },
+  { id: 25, url: "/Gallery_photos/gallery-05.jpeg", title: "Festive Celebration", category: "Festivals", photographer: "Temple Trust" },
+  { id: 26, url: "/Gallery_photos/gallery-06.jpeg", title: "Aarti Ceremony", category: "Aarti & Rituals", photographer: "Temple Trust" },
+  { id: 27, url: "/Gallery_photos/gallery-07.jpeg", title: "Evening Prayer", category: "Aarti & Rituals", photographer: "Temple Trust" },
+  { id: 28, url: "/Gallery_photos/gallery-08.jpeg", title: "Temple Architecture", category: "Temple", photographer: "Temple Trust" },
+  { id: 29, url: "/Gallery_photos/gallery-09.jpeg", title: "Grand Festival", category: "Festivals", photographer: "Temple Trust" },
+  { id: 30, url: "/Gallery_photos/gallery-10.jpeg", title: "Pilgrims Gathering", category: "Devotees", photographer: "Temple Trust" },
+  { id: 31, url: "/Gallery_photos/gallery-11.jpeg", title: "Sacred Offerings", category: "Aarti & Rituals", photographer: "Temple Trust" },
+  { id: 32, url: "/Gallery_photos/gallery-12.png",  title: "Temple Overview", category: "Temple", photographer: "Temple Trust" },
+  { id: 33, url: "/Gallery_photos/gallery-13.jpeg", title: "Devotee Prayers", category: "Devotees", photographer: "Temple Trust" },
+  { id: 34, url: "/Gallery_photos/gallery-14.jpeg", title: "Shyam Bhajan", category: "Devotees", photographer: "Temple Trust" },
+  { id: 35, url: "/Gallery_photos/gallery-15.jpeg", title: "Holy Darbar", category: "Temple", photographer: "Temple Trust" },
+  { id: 36, url: "/Gallery_photos/gallery-16.jpeg", title: "Festival Decorations", category: "Festivals", photographer: "Temple Trust" },
+  { id: 37, url: "/Gallery_photos/gallery-17.jpeg", title: "Lamp Lighting", category: "Aarti & Rituals", photographer: "Temple Trust" },
+  { id: 38, url: "/Gallery_photos/gallery-18.jpeg", title: "Temple at Dusk", category: "Temple", photographer: "Temple Trust" },
 ];
 
 const CATEGORIES: Category[] = ["All", "Temple", "Festivals", "Devotees", "Aarti & Rituals"];
@@ -223,7 +241,7 @@ export function GalleryPage() {
           {/* Image */}
           <div className="max-w-4xl w-full" onClick={e => e.stopPropagation()}>
             <img
-              src={activeItem.url.replace("w=900", "w=1400")}
+              src={activeItem.url.includes("unsplash.com") ? activeItem.url.replace("w=900", "w=1400") : activeItem.url}
               alt={activeItem.title}
               className="w-full max-h-[80vh] object-contain rounded-xl"
               style={{ boxShadow: "0 30px 80px rgba(0,0,0,0.6)" }}
