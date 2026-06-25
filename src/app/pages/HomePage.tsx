@@ -30,6 +30,13 @@ const C = {
   muted: "#666666",
 };
 
+interface LiveAnnouncement {
+  id: number;
+  text: string;
+  active: boolean;
+  created_at: string;
+}
+
 export function HomePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -40,6 +47,19 @@ export function HomePage() {
   const [weatherCode, setWeatherCode] = useState<number>(800); // OpenWeather code for Clear Sky
   
   const isLoggedIn = !!localStorage.getItem("token");
+
+  const [announcements, setAnnouncements] = useState<LiveAnnouncement[]>([]);
+
+  useEffect(() => {
+    const fetchAnn = () =>
+      fetch("http://localhost:8000/api/admin/announcements?active_only=true")
+        .then(r => r.ok ? r.json() : [])
+        .then((data: LiveAnnouncement[]) => setAnnouncements(data))
+        .catch(() => { /* keep previous */ });
+    fetchAnn();
+    const timer = setInterval(fetchAnn, 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
 
 
