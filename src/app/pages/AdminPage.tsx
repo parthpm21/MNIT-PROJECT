@@ -1218,7 +1218,7 @@ function LiveStatus() {
         <div className="grid lg:grid-cols-3 gap-0">
           <div className="lg:col-span-2 relative" style={{ aspectRatio: "16/9", backgroundColor: "#0a0a0a", minHeight: 220 }}>
             <img 
-              src={activeCam.status === "offline" || activeCam.status === "error"
+              src={activeCam.status === "offline" || activeCam.status === "error" || activeCam.status === "not_configured"
                 ? activeCam.img 
                 : `http://localhost:8000/api/v1/cameras/${activeCam.id}/stream`
               } 
@@ -1247,13 +1247,21 @@ function LiveStatus() {
               <button key={cam.id} onClick={() => setSelCam(cam.id)}
                 className="relative overflow-hidden transition-all"
                 style={{ aspectRatio: "16/9", borderBottom: `1px solid ${C.border}`, outline: selCam === cam.id ? `2px solid ${C.orange}` : "none", outlineOffset: "-2px" }}>
-                <img src={cam.img} alt={cam.label} className="w-full h-full object-cover"
-                  style={{ filter: cam.status === "offline" || cam.status === "error" ? "grayscale(1) brightness(0.4)" : selCam === cam.id ? "brightness(1)" : "brightness(0.6)" }} />
+                <img
+                  src={
+                    cam.status === "offline" || cam.status === "error" || cam.status === "not_configured"
+                      ? cam.img
+                      : `http://localhost:8000/api/v1/cameras/${cam.id}/snapshot?t=${liveTime.getTime()}`
+                  }
+                  alt={cam.label}
+                  className="w-full h-full object-cover"
+                  style={{ filter: cam.status === "offline" || cam.status === "error" || cam.status === "not_configured" ? "grayscale(1) brightness(0.4)" : selCam === cam.id ? "brightness(1)" : "brightness(0.6)" }}
+                />
                 <div className="absolute inset-0 px-1.5 py-1 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                      style={{ backgroundColor: cam.status === "offline" || cam.status === "error" ? "rgba(0,0,0,0.7)" : "rgba(220,38,38,0.85)", color: "white" }}>
-                      {cam.status === "offline" || cam.status === "error" ? "OFF" : "● LIVE"}
+                      style={{ backgroundColor: cam.status === "offline" || cam.status === "error" || cam.status === "not_configured" ? "rgba(0,0,0,0.7)" : "rgba(220,38,38,0.85)", color: "white" }}>
+                      {cam.status === "offline" || cam.status === "error" || cam.status === "not_configured" ? "OFF" : "● LIVE"}
                     </span>
                     <span className="text-[9px] font-bold" style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "white", padding: "1px 4px", borderRadius: 3 }}>{cam.id}</span>
                   </div>
