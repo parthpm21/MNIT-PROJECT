@@ -40,7 +40,7 @@ const PLACES: Place[] = [
   { name: "Khatu Fort", category: "Fort", distance: 0, desc: "historic fort in town", image: khatuFortImg },
   { name: "Jeen Mata Temple", category: "Temple", distance: 28, desc: "hilltop Durga shrine, 300+ steps", image: jeenMataImg },
   { name: "Harshnath Temple", category: "Temple", distance: 35, desc: "10th-c. Shiva temple, Aravalli views", image: harshnathImg },
-  { name: "Ranila Hill Fort", category: "Fort", distance: 20, desc: "rocky hilltop fort, valley views", image: ranilaFortImg },
+//  { name: "Ranila Hill Fort", category: "Fort", distance: 20, desc: "rocky hilltop fort, valley views", image: ranilaFortImg },
   { name: "Sikar city", category: "Heritage Town", distance: 35, desc: "frescoed havelis, bazaars", image: sikarCityImg },
   { name: "Devgarh Fort", category: "Fort", distance: 50, desc: "18th-c. fort, Rajputana-Mughal style", image: devgarhImg },
   { name: "Nawalgarh", category: "Heritage Town", distance: 60, desc: "Shekhawati painted havelis", image: nawalgarhImg },
