@@ -15,7 +15,7 @@ import * as api from "../services/adminApi";
 import type {
   AdminUser, AdminDonation, AdminBooking,
   AdminSupportTicket, AdminVehiclePermit, AdminStats, Announcement,
-  AdminGeneralPermission,
+  AdminGeneralPermission, ParkingLotAdmin, ParkingSnapshot,
 } from "../services/adminApi";
 
 /* ─── palette (site theme) ──────────────────────────────── */
@@ -39,7 +39,7 @@ const C = {
 type Section =
   | "dashboard" | "donations" | "vehicle" | "permissions" | "epass"
   | "livestatus" | "gallery" | "announcements" | "support" | "reports"
-  | "users" | "lostfound";
+  | "users" | "lostfound" | "parking";
 
 /* ─── sidebar nav ───────────────────────────────────────── */
 const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
@@ -49,6 +49,7 @@ const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   { id: "epass", label: "E-Pass & Bookings", icon: <UserCheck size={16} /> },
   { id: "vehicle", label: "Vehicle Permits", icon: <Car size={16} /> },
   { id: "permissions", label: "Permissions", icon: <ClipboardList size={16} /> },
+  { id: "parking", label: "Parking (AI)", icon: <Camera size={16} /> },
   { id: "livestatus", label: "Live Status", icon: <Radio size={16} /> },
   { id: "gallery", label: "Gallery", icon: <Images size={16} /> },
   { id: "announcements", label: "Announcements", icon: <Megaphone size={16} /> },
@@ -2080,6 +2081,372 @@ function LostFoundSection() {
 }
 
 
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION: PARKING (AI-powered vehicle detection)
+═══════════════════════════════════════════════════════════ */
+function ParkingAdmin() {
+  const [lots, setLots] = useState<ParkingLotAdmin[]>([]);
+  const [snapshots, setSnapshots] = useState<Record<number, ParkingSnapshot[]>>({});
+  const [selectedLot, setSelectedLot] = useState<ParkingLotAdmin | null>(null);
+  const [analyzing, setAnalyzing] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editLot, setEditLot] = useState<ParkingLotAdmin | null>(null);
+  const [formName, setFormName] = useState("");
+  const [formSlots, setFormSlots] = useState("100");
+  const [formCamera, setFormCamera] = useState("");
+  const [formDesc, setFormDesc] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const loadLots = useCallback(async () => {
+    setLoading(true); setError("");
+    try {
+      const data = await api.getAdminParkingLots();
+      setLots(data);
+      if (data.length > 0) setSelectedLot(prev => prev ? (data.find(l => l.id === prev.id) ?? data[0]) : data[0]);
+    } catch (e: unknown) {
+      setError((e as Error).message ?? "Failed to load parking lots.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadLots(); }, [loadLots]);
+
+  const loadSnapshots = useCallback(async (lotId: number) => {
+    try {
+      const snaps = await api.getParkingSnapshots(lotId, 20);
+      setSnapshots(prev => ({ ...prev, [lotId]: snaps }));
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => { if (selectedLot) loadSnapshots(selectedLot.id); }, [selectedLot, loadSnapshots]);
+
+  async function handleAnalyze(lot: ParkingLotAdmin) {
+    setAnalyzing(lot.id);
+    try {
+      await api.triggerParkingAnalysis(lot.id);
+      const [updatedLots, snaps] = await Promise.all([
+        api.getAdminParkingLots(),
+        api.getParkingSnapshots(lot.id, 20),
+      ]);
+      setLots(updatedLots);
+      setSnapshots(prev => ({ ...prev, [lot.id]: snaps }));
+      const updated = updatedLots.find(l => l.id === lot.id);
+      if (updated) setSelectedLot(updated);
+    } catch (e: unknown) {
+      alert((e as Error).message ?? "Analysis failed.");
+    } finally {
+      setAnalyzing(null);
+    }
+  }
+
+  function openForm(lot?: ParkingLotAdmin) {
+    setEditLot(lot ?? null);
+    setFormName(lot?.name ?? "");
+    setFormSlots(String(lot?.total_slots ?? 100));
+    setFormCamera(lot?.camera_url ?? "");
+    setFormDesc(lot?.location_description ?? "");
+    setShowForm(true);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      if (editLot) {
+        await api.updateParkingLot(editLot.id, {
+          name: formName, total_slots: Number(formSlots),
+          camera_url: formCamera || undefined,
+          location_description: formDesc || undefined,
+        });
+      } else {
+        await api.createParkingLot({
+          name: formName, total_slots: Number(formSlots),
+          camera_url: formCamera || undefined,
+          location_description: formDesc || undefined,
+        });
+      }
+      setShowForm(false);
+      await loadLots();
+    } catch (e: unknown) {
+      alert((e as Error).message ?? "Save failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Deactivate this parking lot?")) return;
+    try {
+      await api.deleteParkingLot(id);
+      await loadLots();
+      if (selectedLot?.id === id) setSelectedLot(null);
+    } catch (e: unknown) {
+      alert((e as Error).message ?? "Delete failed.");
+    }
+  }
+
+  function getYouTubeEmbed(url: string | null) {
+    if (!url) return null;
+    const match = url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (!match) return null;
+    return `https://www.youtube.com/embed/${match[1]}?autoplay=0&mute=1&controls=1&rel=0`;
+  }
+
+  function slotColor(pct: number) {
+    if (pct >= 90) return "#ef4444";
+    if (pct >= 70) return "#f97316";
+    if (pct >= 40) return "#eab308";
+    return "#22c55e";
+  }
+
+  const lotSnaps = selectedLot ? (snapshots[selectedLot.id] ?? []) : [];
+  const embedUrl = selectedLot ? getYouTubeEmbed(selectedLot.camera_url) : null;
+
+  if (loading) return <LoadingSpinner msg="Loading parking lots…" />;
+  if (error) return <ErrorBanner msg={error} onRetry={loadLots} />;
+
+  return (
+    <div>
+      <Head
+        title="Parking Management (AI)"
+        sub="AI-powered vehicle detection — monitor slots and camera feeds"
+        right={
+          <button id="parking-add-lot-btn" onClick={() => openForm()}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white"
+            style={{ backgroundColor: C.darkBlue }}>
+            <Plus size={14} /> Add Lot
+          </button>
+        }
+      />
+
+      {/* Add / Edit Lot Modal */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4"
+            style={{ border: `1px solid ${C.border}`, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+            <h3 className="text-sm font-bold mb-4" style={{ color: C.text }}>
+              {editLot ? "Edit Parking Lot" : "Add New Parking Lot"}
+            </h3>
+            <div className="flex flex-col gap-3">
+              {([
+                ["Lot Name *", formName, setFormName, "e.g. Main Parking Zone A", "text"],
+                ["Total Slots *", formSlots, setFormSlots, "e.g. 150", "number"],
+                ["Camera URL (YouTube)", formCamera, setFormCamera, "https://youtube.com/watch?v=...", "url"],
+                ["Location Description", formDesc, setFormDesc, "e.g. Near Gate 1, North Side", "text"],
+              ] as [string, string, (v: string) => void, string, string][]).map(([label, val, setter, ph, type]) => (
+                <div key={label}>
+                  <label className="text-[11px] font-semibold mb-1 block" style={{ color: C.muted }}>{label}</label>
+                  <input type={type} value={val} onChange={e => setter(e.target.value)} placeholder={ph}
+                    className="w-full px-3 py-2 rounded-xl text-xs outline-none"
+                    style={{ border: `1px solid ${C.border}`, color: C.text }} />
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleSave} disabled={saving || !formName || !formSlots}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white"
+                style={{ backgroundColor: C.darkBlue, opacity: saving ? 0.7 : 1 }}>
+                {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                {saving ? "Saving…" : "Save"}
+              </button>
+              <button onClick={() => setShowForm(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-xs font-bold"
+                style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}` }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid xl:grid-cols-3 gap-5">
+        {/* Left: Lot List */}
+        <div className="xl:col-span-1 flex flex-col gap-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: C.muted }}>Parking Lots</p>
+          {lots.length === 0 && (
+            <div className="text-xs text-center py-8 rounded-2xl"
+              style={{ background: C.bg, color: C.muted, border: `1px dashed ${C.border}` }}>
+              No lots configured. Click "Add Lot" to get started.
+            </div>
+          )}
+          {lots.map(lot => {
+            const color = slotColor(lot.occupancy_pct);
+            const isSelected = selectedLot?.id === lot.id;
+            return (
+              <div key={lot.id} id={`parking-lot-${lot.id}`}
+                onClick={() => setSelectedLot(lot)}
+                className="rounded-2xl p-4 cursor-pointer transition-all"
+                style={{
+                  backgroundColor: isSelected ? `${C.darkBlue}0f` : C.bg,
+                  border: `1.5px solid ${isSelected ? C.darkBlue : C.border}`,
+                  boxShadow: isSelected ? `0 0 0 3px ${C.darkBlue}18` : undefined,
+                }}>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate" style={{ color: C.text }}>{lot.name}</p>
+                    {lot.location_description && (
+                      <p className="text-[10px] truncate mt-0.5" style={{ color: C.muted }}>📍 {lot.location_description}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 ml-2">
+                    <IconBtn col={C.darkBlue} icon={<Edit2 size={11} />} tip="Edit" onClick={e => { e.stopPropagation(); openForm(lot); }} />
+                    <IconBtn col={C.red} icon={<Trash2 size={11} />} tip="Deactivate" onClick={e => { e.stopPropagation(); handleDelete(lot.id); }} />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="flex justify-between text-[10px] mb-1" style={{ color: C.muted }}>
+                    <span>Occupied: <b style={{ color: "#ef4444" }}>{lot.occupied_slots}</b></span>
+                    <span>Free: <b style={{ color: "#22c55e" }}>{lot.available_slots}</b></span>
+                  </div>
+                  <div style={{ background: "#e5e7eb", borderRadius: 6, height: 6, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${lot.occupancy_pct}%`, background: color, borderRadius: 6, transition: "width 0.6s ease" }} />
+                  </div>
+                  <div className="flex justify-between text-[10px] mt-1" style={{ color: C.muted }}>
+                    <span>{Math.round(lot.occupancy_pct)}% occupied</span>
+                    <span>/{lot.total_slots} total</span>
+                  </div>
+                </div>
+                <button id={`parking-analyze-${lot.id}`}
+                  onClick={e => { e.stopPropagation(); handleAnalyze(lot); }}
+                  disabled={analyzing === lot.id}
+                  className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all"
+                  style={{ backgroundColor: `${C.darkBlue}12`, color: C.darkBlue, border: `1px solid ${C.darkBlue}30`, opacity: analyzing === lot.id ? 0.6 : 1 }}>
+                  {analyzing === lot.id
+                    ? <><Loader2 size={11} className="animate-spin" /> Analyzing…</>
+                    : <><Activity size={11} /> Run AI Detection</>}
+                </button>
+                {!lot.is_active && (
+                  <span className="mt-2 inline-block text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                    style={{ background: "#f3f4f6", color: C.muted }}>Inactive</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Right: Detail panel */}
+        <div className="xl:col-span-2 flex flex-col gap-5">
+          {!selectedLot ? (
+            <div className="rounded-2xl flex flex-col items-center justify-center py-20 text-center"
+              style={{ background: C.bg, border: `1px dashed ${C.border}` }}>
+              <Camera size={32} style={{ color: C.muted }} className="mb-3" />
+              <p className="text-xs font-semibold" style={{ color: C.muted }}>Select a parking lot to view details</p>
+            </div>
+          ) : (
+            <>
+              {/* Camera Feed */}
+              <div className="bg-white rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+                  <div className="flex items-center gap-2">
+                    <Camera size={14} style={{ color: C.darkBlue }} />
+                    <p className="text-xs font-bold" style={{ color: C.text }}>Live Camera Feed</p>
+                    <span className="flex items-center gap-1 text-[10px] font-semibold"
+                      style={{ color: embedUrl ? "#22c55e" : C.muted }}>
+                      <span className="w-1.5 h-1.5 rounded-full inline-block"
+                        style={{ background: embedUrl ? "#22c55e" : "#9ca3af" }} />
+                      {embedUrl ? "Feed Active" : "No Feed Configured"}
+                    </span>
+                  </div>
+                  <span className="text-[10px]" style={{ color: C.muted }}>{selectedLot.name}</span>
+                </div>
+                {embedUrl ? (
+                  <div style={{ position: "relative", paddingTop: "56.25%", background: "#000" }}>
+                    <iframe id={`parking-video-${selectedLot.id}`}
+                      src={embedUrl} title={`Camera: ${selectedLot.name}`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }} />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-14"
+                    style={{ background: "#0f172a", minHeight: 200 }}>
+                    <Monitor size={36} style={{ color: "rgba(255,255,255,0.15)" }} className="mb-3" />
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>No camera URL configured</p>
+                    <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.2)" }}>
+                      Edit this lot and paste a YouTube URL to enable the feed
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* AI Stat Cards */}
+              <div className="grid sm:grid-cols-3 gap-4">
+                {[
+                  { label: "Total Slots", value: selectedLot.total_slots, color: C.darkBlue },
+                  { label: "Occupied", value: selectedLot.occupied_slots, color: "#ef4444" },
+                  { label: "Available", value: selectedLot.available_slots, color: "#22c55e" },
+                ].map(({ label, value, color }) => (
+                  <div key={label} className="bg-white rounded-2xl p-5 text-center" style={{ border: `1px solid ${C.border}` }}>
+                    <p className="text-3xl font-extrabold" style={{ color }}>{value}</p>
+                    <p className="text-[11px] uppercase tracking-wider mt-1 font-semibold" style={{ color: C.muted }}>{label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* AI Confidence Bar */}
+              {lotSnaps.length > 0 && lotSnaps[0].confidence_score != null && (
+                <div className="bg-white rounded-2xl px-5 py-4 flex items-center gap-4"
+                  style={{ border: `1px solid ${C.border}` }}>
+                  <ShieldCheck size={18} style={{ color: C.green, flexShrink: 0 }} />
+                  <div className="flex-1">
+                    <p className="text-[11px] font-bold" style={{ color: C.muted }}>AI Detection Confidence</p>
+                    <div style={{ background: "#e5e7eb", borderRadius: 6, height: 8, marginTop: 6 }}>
+                      <div style={{
+                        height: "100%", width: `${(lotSnaps[0].confidence_score * 100).toFixed(0)}%`,
+                        background: `linear-gradient(90deg, ${C.green}, #4ade80)`,
+                        borderRadius: 6, transition: "width 0.6s ease",
+                      }} />
+                    </div>
+                  </div>
+                  <span className="text-sm font-extrabold" style={{ color: C.green }}>
+                    {(lotSnaps[0].confidence_score * 100).toFixed(0)}%
+                  </span>
+                </div>
+              )}
+
+              {/* Detection History Table */}
+              {lotSnaps.length > 0 ? (
+                <div className="bg-white rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                  <div className="px-5 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+                    <p className="text-xs font-bold" style={{ color: C.text }}>AI Detection History (last 20 scans)</p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead><tr>{["Time", "Occupied", "Available", "Confidence", "Boxes Detected"].map(h => <Th key={h} ch={h} />)}</tr></thead>
+                      <tbody>
+                        {lotSnaps.map(snap => (
+                          <tr key={snap.id} className="hover:bg-gray-50 transition-colors">
+                            <Td>{new Date(snap.recorded_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</Td>
+                            <Td><span className="font-bold" style={{ color: "#ef4444" }}>{snap.occupied_slots}</span></Td>
+                            <Td><span className="font-bold" style={{ color: "#22c55e" }}>{snap.available_slots}</span></Td>
+                            <Td>{snap.confidence_score != null ? <span className="font-semibold" style={{ color: C.green }}>{(snap.confidence_score * 100).toFixed(0)}%</span> : "—"}</Td>
+                            <Td>{snap.vehicle_boxes ? snap.vehicle_boxes.length : snap.occupied_slots}</Td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl flex flex-col items-center justify-center py-10 text-center"
+                  style={{ background: C.bg, border: `1px dashed ${C.border}` }}>
+                  <Activity size={24} style={{ color: C.muted }} className="mb-2" />
+                  <p className="text-xs" style={{ color: C.muted }}>No AI scans yet — click "Run AI Detection" to start.</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 /* ═══════════════════════════════════════════════════════════
    ROOT — AdminPage
 ═══════════════════════════════════════════════════════════ */
@@ -2125,6 +2492,7 @@ export function AdminPage() {
   const SECTION_TITLE: Record<Section, string> = {
     dashboard: "Dashboard", users: "User Management", donations: "Donations",
     vehicle: "Vehicle Permits", permissions: "Permissions", epass: "E-Pass & Bookings",
+    parking: "Parking Management (AI)",
     livestatus: "Live Status", gallery: "Gallery", announcements: "Announcements",
     support: "Support Tickets", reports: "Reports", lostfound: "Lost & Found",
   };
@@ -2218,6 +2586,7 @@ export function AdminPage() {
           {section === "support" && <Support />}
           {section === "reports" && <Reports />}
           {section === "lostfound" && <LostFoundSection />}
+          {section === "parking" && <ParkingAdmin />}
         </main>
       </div>
     </div>

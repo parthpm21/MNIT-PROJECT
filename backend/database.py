@@ -55,7 +55,7 @@ AsyncSessionLocal = async_sessionmaker(
 
 async def seed_data():
     """Seed initial mock records if database tables are empty."""
-    from models.sql_models import Donation, Vehicle, VehiclePermission, SupportQuery, GeneralPermission, Booking, AccommodationProperty, AccommodationRoom
+    from models.sql_models import Donation, Vehicle, VehiclePermission, SupportQuery, GeneralPermission, Booking, AccommodationProperty, AccommodationRoom, ParkingLot, ParkingSnapshot
     from sqlalchemy.future import select
     from datetime import datetime, timedelta, timezone
 
@@ -190,6 +190,60 @@ async def seed_data():
                 r12 = AccommodationRoom(property_id=p4.id, type="Double Room", category="Non-AC", base_price=500.0, total_rooms=30, available_rooms=28)
 
                 session.add_all([r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12])
+
+            # 7. Parking Lots
+            res_parking = await session.execute(select(ParkingLot).limit(1))
+            if not res_parking.scalar_one_or_none():
+                pl1 = ParkingLot(
+                    name="Main Entrance Parking (Zone A)",
+                    total_slots=120,
+                    camera_url="https://www.youtube.com/watch?v=1-iS7LArMPA",
+                    location_description="Near the main gate, east wing",
+                    is_active=True,
+                    created_at=datetime.now(timezone.utc) - timedelta(days=5)
+                )
+                pl2 = ParkingLot(
+                    name="VIP Parking (Zone B)",
+                    total_slots=50,
+                    camera_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    location_description="Directly behind the administrative building",
+                    is_active=True,
+                    created_at=datetime.now(timezone.utc) - timedelta(days=5)
+                )
+                pl3 = ParkingLot(
+                    name="North Gate Parking (Zone C)",
+                    total_slots=80,
+                    camera_url="https://www.youtube.com/watch?v=2g811Eo7K8U",
+                    location_description="Next to the guest house complex",
+                    is_active=True,
+                    created_at=datetime.now(timezone.utc) - timedelta(days=5)
+                )
+                session.add_all([pl1, pl2, pl3])
+                await session.flush()
+
+                # Add initial snapshots so there is some mock data
+                s1 = ParkingSnapshot(
+                    lot_id=pl1.id,
+                    occupied_slots=72,
+                    available_slots=48,
+                    confidence_score=0.91,
+                    recorded_at=datetime.now(timezone.utc) - timedelta(minutes=15)
+                )
+                s2 = ParkingSnapshot(
+                    lot_id=pl2.id,
+                    occupied_slots=15,
+                    available_slots=35,
+                    confidence_score=0.88,
+                    recorded_at=datetime.now(timezone.utc) - timedelta(minutes=10)
+                )
+                s3 = ParkingSnapshot(
+                    lot_id=pl3.id,
+                    occupied_slots=45,
+                    available_slots=35,
+                    confidence_score=0.94,
+                    recorded_at=datetime.now(timezone.utc) - timedelta(minutes=5)
+                )
+                session.add_all([s1, s2, s3])
 
             await session.commit()
         except Exception as e:
