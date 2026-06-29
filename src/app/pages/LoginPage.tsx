@@ -38,7 +38,7 @@ export function LoginPage() {
       <div className="flex w-full" style={{ height: "100dvh", overflow: "hidden" }}>
 
         {/* LEFT: image panel */}
-        <div className="relative w-1/2 h-full flex-shrink-0 overflow-hidden">
+        <div className="relative hidden md:block md:w-1/2 h-full flex-shrink-0 overflow-hidden">
           <img src={templeImg} alt="Khatu Shyam Ji" className="absolute inset-0 w-full h-full object-cover object-top" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,4,20,0.88) 0%, rgba(8,4,20,0.25) 40%, transparent 65%)" }} />
           <div className="absolute bottom-8 left-8">
@@ -52,7 +52,7 @@ export function LoginPage() {
         </div>
 
         {/* RIGHT: form panel */}
-        <div className="w-1/2 h-full flex flex-col items-center justify-center px-6 py-4" style={{ backgroundColor: C.panelBg, overflowY: "auto" }}>
+        <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center px-6 py-4" style={{ backgroundColor: C.panelBg, overflowY: "auto" }}>
           <div className="w-full max-w-sm flex flex-col gap-3">
 
             {/* Back to home */}

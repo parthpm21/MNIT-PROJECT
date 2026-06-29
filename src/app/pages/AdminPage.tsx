@@ -244,7 +244,7 @@ function Dashboard() {
       <Head title="Dashboard" sub="Welcome back, Admin — here's today at a glance." />
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
         <Kpi label="Registered Users" value={String(stats.total_users)} sub="all time" icon={<Users2 size={20} />} color={C.darkBlue} trend="up" />
         <Kpi label="Total Donated" value={`₹${(stats.total_donated_amount / 1000).toFixed(1)}K`} sub={`${stats.total_donations} transactions`} icon={<IndianRupee size={20} />} color={C.green} trend="up" />
         <Kpi label="Total Bookings" value={String(stats.total_bookings)} sub="Darshan e-passes" icon={<UserCheck size={20} />} color={C.orange} />
@@ -3908,10 +3908,23 @@ function ParkingControl() {
 export function AdminPage() {
   const navigate = useNavigate();
   const [section, setSection] = useState<Section>("dashboard");
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(window.innerWidth < 1024);
   const [adminName, setAdminName] = useState("Admin");
   const [adminEmail, setAdminEmail] = useState("");
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setCollapsed(false);
+      } else {
+        setCollapsed(true);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Auth guard — check token on mount
   useEffect(() => {
@@ -3956,8 +3969,15 @@ export function AdminPage() {
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: C.bg, fontFamily: "system-ui,-apple-system,sans-serif" }}>
 
-      {/* ── Sidebar ──────────────────────────────────── */}
-      <aside className="flex flex-col flex-shrink-0 transition-all duration-300 overflow-hidden"
+      {/* Backdrop overlay for mobile/tablet when sidebar is open */}
+      {!collapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setCollapsed(true)}
+        />
+      )}
+
+      <aside className="flex flex-col flex-shrink-0 transition-all duration-300 overflow-hidden z-50 lg:relative fixed inset-y-0 left-0 h-full"
         style={{ width: collapsed ? 0 : 220, backgroundColor: C.navy }}>
 
         <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0"
@@ -4006,8 +4026,8 @@ export function AdminPage() {
               <MenuIcon size={18} />
             </button>
             <div>
-              <p className="text-sm font-bold" style={{ color: C.text }}>{SECTION_TITLE[section]}</p>
-              <p className="text-[11px]" style={{ color: C.muted }}>Khatu Shyam Ji Temple · Admin Portal</p>
+              <p className="text-xs sm:text-sm font-bold" style={{ color: C.text }}>{SECTION_TITLE[section]}</p>
+              <p className="text-[11px] hidden sm:block" style={{ color: C.muted }}>Khatu Shyam Ji Temple · Admin Portal</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
