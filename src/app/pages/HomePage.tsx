@@ -10,13 +10,24 @@ import {
   CalendarDays, Car, ShieldAlert, Phone, Heart, Shield, MapPin, X
 } from "lucide-react";
 import templeImg from "../../imports/khatu-shyam-ji.jpg";
+import officerLogin from "../../imports/officer login.jpeg";
+import heroImg1 from "../../imports/hero section1.jpeg";
 import logoImg from "../../imports/image-21.png";
 import imgLostFound from "../../imports/lost and found.avif";
 import imgVehicle from "../../imports/vehicle permission.jpg.jpeg";
-import imgDarshan from "../../imports/darshan booking.webp";
-import imgDonation from "../../imports/donation.png";
+import imgDarshan from "../../imports/darshan booking.jpeg";
+import imgDonation from "../../imports/donation.jpeg";
 import imgHealth from "../../imports/health camp.jpg.jpeg";
 import { getParkingZones, type ParkingZone } from "../services/adminApi";
+import bhandaraPermission from "../../imports/bhandara permission.jpeg";
+import premimumAnnadaanSeva from "../../imports/anna daan.jpeg";
+import trafficCommandCenter from "../../imports/traffic command center.jpeg";
+import accomodation from "../../imports/accomodation.jpeg";
+import crowdStatus from "../../imports/crowd status.jpeg";
+
+
+
+
 
 const C = {
   orange: "#F7941D",
@@ -66,7 +77,7 @@ export function HomePage() {
 
     const connectWS = () => {
       ws = new WebSocket("ws://localhost:8000/api/parking/ws");
-      
+
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
@@ -75,11 +86,11 @@ export function HomePage() {
               prevZones.map((z) =>
                 z.zone_id === msg.zone_id
                   ? {
-                      ...z,
-                      current_occupancy: msg.current_occupancy,
-                      available_slots: msg.available_slots,
-                      pct_full: msg.pct_full,
-                    }
+                    ...z,
+                    current_occupancy: msg.current_occupancy,
+                    available_slots: msg.available_slots,
+                    pct_full: msg.pct_full,
+                  }
                   : z
               )
             );
@@ -114,10 +125,10 @@ export function HomePage() {
     const totalAvailable = activeZones.reduce((acc, z) => acc + z.available_slots, 0);
     const totalLimit = activeZones.reduce((acc, z) => acc + z.system_capacity_limit, 0);
     const totalOccupied = activeZones.reduce((acc, z) => acc + z.current_occupancy, 0);
-    
+
     let statusLabel = "Available";
     let statusColor = C.green; // #28A745
-    
+
     const freeRatio = totalLimit > 0 ? totalAvailable / totalLimit : 1.0;
     if (freeRatio > 0.20) {
       statusLabel = "Available";
@@ -225,37 +236,95 @@ export function HomePage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: C.cream }}>
 
-      {/* ── Hero ────────────────────────────────────────── */}
-      <section className="relative w-full" style={{ height: "75vh", minHeight: "420px" }}>
-        <img src={templeImg} alt="Khatu Shyam Ji Temple" className="absolute inset-0 w-full h-full object-cover object-top" />
-        <div className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(21,32,96,0.92) 0%, rgba(21,32,96,0.45) 45%, transparent 100%)` }} />
+      {/* ───────── Hero Section ───────── */}
+      <section
+        className="relative w-full overflow-hidden"
+        style={{ height: "80vh", minHeight: "500px" }}
+      >
+        {/* Hero Image — objectPosition keeps deity's face centered */}
+        <img
+          src={heroImg1}
+          alt="Khatu Shyam Ji Temple"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: "center 40%" }}
+        />
 
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-12 text-center">
-          <p className="mb-3 uppercase tracking-widest text-xs font-semibold" style={{ color: C.orange }}>
-            {t('hero.subtitle')}
+        {/* Dark Gradient Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(16,28,80,.85) 0%, rgba(16,28,80,.35) 40%, rgba(0,0,0,.10) 100%)",
+          }}
+        />
+
+        {/* Text */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end text-center px-6 pb-14 z-10">
+          <p
+            className="uppercase tracking-[4px] mb-3 font-semibold"
+            style={{
+              color: "#ff9d1e",
+              fontSize: "14px",
+            }}
+          >
+            {t("hero.subtitle")}
           </p>
-          <h1 className="mb-3" style={{ color: C.white, fontSize: "clamp(1.8rem, 5vw, 3.2rem)", fontWeight: 700, textShadow: "0 2px 16px rgba(0,0,0,0.5)", fontFamily: "'Georgia', serif" }}>
-            {t('hero.title')}
+
+          <h1
+            style={{
+              color: "#fff",
+              fontSize: "clamp(2rem,5vw,4rem)",
+              fontWeight: 700,
+              fontFamily: "Georgia, serif",
+              textShadow: "0 3px 15px rgba(0,0,0,.6)",
+            }}
+          >
+            {t("hero.title")}
           </h1>
-          <p className="mb-6 mx-auto max-w-lg text-sm" style={{ color: "rgba(255,255,255,0.85)", lineHeight: 1.8 }}>
-            {t('hero.desc')}
+
+          <p
+            className="mt-3"
+            style={{
+              color: "rgba(255,255,255,.88)",
+              maxWidth: "600px",
+              lineHeight: 1.8,
+              fontSize: "clamp(14px,2vw,17px)",
+            }}
+          >
+            {t("hero.desc")}
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => navigate("/darshan-booking")}
-              className="px-7 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:opacity-90"
-              style={{ backgroundColor: C.orange, boxShadow: `0 4px 18px rgba(247,148,29,0.45)` }}>
-              {t('hero.bookBtn')}
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => navigate("/darshan-booking")}
+              className="px-8 py-3 rounded-full text-white font-bold transition hover:scale-105"
+              style={{
+                background: "#ff9d1e",
+                fontSize: "clamp(14px,2vw,16px)",
+                boxShadow: "0 8px 25px rgba(255,157,30,.45)",
+              }}
+            >
+              {t("hero.bookBtn")}
             </button>
             {!isLoggedIn && (
-              <button onClick={() => navigate("/login")}
-                className="px-7 py-2.5 rounded-full text-sm font-bold border-2 transition-all"
-                style={{ borderColor: C.white, color: C.white, backgroundColor: "rgba(255,255,255,0.10)" }}>
-                {t('hero.loginBtn')}
+              <button
+                onClick={() => navigate("/login")}
+                className="px-8 py-3 rounded-full font-bold border-2 transition hover:scale-105"
+                style={{
+                  borderColor: C.white,
+                  color: C.white,
+                  fontSize: "clamp(14px,2vw,16px)",
+                  backgroundColor: "rgba(255,255,255,0.10)",
+                }}
+              >
+                {t("hero.loginBtn")}
               </button>
             )}
           </div>
         </div>
       </section>
+
+
 
       {/* ── About Strip ─────────────────────────────────── */}
       <section className="py-16 px-6" style={{ backgroundColor: C.white }}>
@@ -277,7 +346,8 @@ export function HomePage() {
             </button>
           </div>
           <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ height: "340px" }}>
-            <img src={templeImg} alt="Khatu Shyam Ji" className="w-full h-full object-cover object-top" />
+            <img src={templeImg} alt="Khatu Shyam Ji" className="w-full h-full object-cover" style={{ objectPosition: "center 20%" }}
+            />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${C.darkBlue}cc 0%, transparent 55%)` }} />
             <div className="absolute bottom-0 left-0 right-0 px-6 py-5" style={{ background: `linear-gradient(to top, ${C.darkBlue} 0%, transparent 100%)` }}>
               <p className="font-bold text-white text-base" style={{ fontFamily: "serif" }}>{t('about.imageText')}</p>
@@ -329,29 +399,29 @@ export function HomePage() {
                   {t('info.viewAll')}
                 </button>
               </div>
-            <div>
-              {(announcements.length > 0
-                ? announcements.map(a => ({
+              <div>
+                {(announcements.length > 0
+                  ? announcements.map(a => ({
                     date: new Date(a.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
                     text: a.text,
                   }))
-                : [
+                  : [
                     { date: "31 May 2026", text: "Shyam Mahotsav special darshan — extra tokens available from 5 AM." },
                     { date: "30 May 2026", text: "Parking at Sector 4 & 6 operational. Sector 2 closed for maintenance." },
                     { date: "28 May 2026", text: "Online prasad booking now open for outstation devotees." },
                     { date: "25 May 2026", text: "Mangala Aarti timing shifted to 4:30 AM effective June 1 (Summer schedule)." },
                   ]
-              ).map((n, i) => (
-                <div key={i} className="flex gap-3 px-5 py-3.5 border-b cursor-pointer transition-colors"
-                  style={{ borderColor: C.border, backgroundColor: i % 2 === 0 ? C.white : C.cream }}>
-                  <span className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ backgroundColor: C.orange }} />
-                  <div>
-                    <p className="text-xs font-medium mb-0.5" style={{ color: C.darkText }}>{n.text}</p>
-                    <p className="text-xs" style={{ color: C.muted }}>{n.date}</p>
+                ).map((n, i) => (
+                  <div key={i} className="flex gap-3 px-5 py-3.5 border-b cursor-pointer transition-colors"
+                    style={{ borderColor: C.border, backgroundColor: i % 2 === 0 ? C.white : C.cream }}>
+                    <span className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ backgroundColor: C.orange }} />
+                    <div>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: C.darkText }}>{n.text}</p>
+                      <p className="text-xs" style={{ color: C.muted }}>{n.date}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
             </div>
 
             {/* Aarti Timings Panel */}
@@ -463,7 +533,7 @@ export function HomePage() {
                 slug: "bandhara-permission",
                 title: t('services.bhandaraTitle'),
                 cta: t('services.btnApply'),
-                img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80",
+                img: bhandaraPermission,
                 desc: t('services.bhandaraDesc'),
               },
               {
@@ -477,7 +547,7 @@ export function HomePage() {
                 slug: "accommodation-booking",
                 title: t('services.accomodationTitle'),
                 cta: t('services.btnBook'),
-                img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
+                img: accomodation,
                 desc: t('services.accomodationDesc'),
               },
               {
@@ -505,14 +575,14 @@ export function HomePage() {
                 slug: "officer-login",
                 title: t('services.officerTitle'),
                 cta: t('services.btnLogin'),
-                img: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=80",
+                img: officerLogin,
                 desc: t('services.officerDesc'),
               },
               {
                 slug: "traffic-command-center",
                 title: t('services.trafficTitle'),
                 cta: t('services.btnOpen'),
-                img: "https://images.unsplash.com/photo-1573497019418-b400bb3ab074?auto=format&fit=crop&w=600&q=80",
+                img: trafficCommandCenter,
                 desc: t('services.trafficDesc'),
               },
               {
@@ -527,7 +597,7 @@ export function HomePage() {
                 path: "/services/annadaan-seva",
                 title: "Premium Annadaan Seva",
                 cta: "Offer Food Seva",
-                img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80",
+                img: premimumAnnadaanSeva,
                 desc: "Feed visiting devotees with Full-Day, Half-Day Bhojan or Sweet Prasad distributed at the temple.",
               },
               {
@@ -548,7 +618,7 @@ export function HomePage() {
                 slug: "crowd-status",
                 title: t('services.crowdTitle'),
                 cta: t('services.btnView'),
-                img: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80",
+                img: crowdStatus,
                 desc: t('services.crowdDesc'),
               },
             ].map(s => (
@@ -607,7 +677,7 @@ export function HomePage() {
         </section>
       )}
 
-      
+
       <style>{`
         @keyframes marquee {
           from { transform: translateX(0); }
