@@ -1,5 +1,3 @@
-aryan papa
-
 ## Tech stack
 
 - React
@@ -10,7 +8,7 @@ aryan papa
 - Framer Motion
 - Pannellum
 - FastAPI + Uvicorn
-- MongoDB database
+- PostgreSQL database
 
 ## Running the code
 
@@ -31,7 +29,3 @@ Run `npm run dev` to start the development server.
 
     `uvicorn backend.main:app --reload --port 8000`
 
-4. Verify health endpoint:
-
-
-    `http://localhost:8000/health`

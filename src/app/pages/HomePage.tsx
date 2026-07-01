@@ -263,8 +263,8 @@ export function HomePage() {
         />
 
         {/* Text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end text-center px-6 pb-14 z-10">
-          <p
+        <div className="absolute inset-0 flex flex-col items-center justify-end text-center px-4 pb-9 z-10">
+          {/* <p
             className="uppercase tracking-[4px] mb-3 font-semibold"
             style={{
               color: "#ff9d1e",
@@ -272,7 +272,7 @@ export function HomePage() {
             }}
           >
             {t("hero.subtitle")}
-          </p>
+          </p> */}
 
           <h1
             style={{
@@ -285,6 +285,16 @@ export function HomePage() {
           >
             {t("hero.title")}
           </h1>
+
+          <p
+            className="uppercase tracking-[4px] mb-3 font-semibold"
+            style={{
+              color: "#ff9d1e",
+              fontSize: "14px",
+            }}
+          >
+            {t("hero.subtitle")}
+          </p>
 
           <p
             className="mt-3"
