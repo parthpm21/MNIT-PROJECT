@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { jsPDF } from "jspdf";
 import { useNavigate } from "react-router";
+import { API_BASE_URL } from "../config";
 import { useForm } from "react-hook-form";
 import {
   ArrowLeft, Heart, CheckCircle2, IndianRupee,
@@ -102,7 +103,7 @@ export function DonationPage() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const res = await fetch("http://localhost:8000/api/donations/create", {
+      const res = await fetch(`${API_BASE_URL}/api/donations/create`, {
         method: "POST",
         headers,
         body: JSON.stringify({

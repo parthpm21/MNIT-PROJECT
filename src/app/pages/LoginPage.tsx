@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../config";
 import {
   Eye, EyeOff, User, Mail, Lock, Phone,
   Shield, AlertTriangle, KeyRound, Smartphone, CheckCircle2,
@@ -21,7 +22,7 @@ const C = {
   red: "#DC2626",
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = API_BASE_URL;
 
 type Portal = "devotee" | "admin";
 type AuthStep = "identifier" | "otp" | "success";

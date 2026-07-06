@@ -18,6 +18,7 @@ import imgDarshan from "../../imports/darshan booking.jpeg";
 import imgDonation from "../../imports/donation.jpeg";
 import imgHealth from "../../imports/health camp.jpg.jpeg";
 import { getParkingZones, type ParkingZone } from "../services/adminApi";
+import { API_BASE_URL, WS_BASE_URL } from "../config";
 import bhandaraPermission from "../../imports/bhandara permission.jpeg";
 import premimumAnnadaanSeva from "../../imports/anna daan.jpeg";
 import liveParkingStatus from "../../imports/parking status.jpeg";
@@ -79,7 +80,7 @@ export function HomePage() {
     let reconnectTimer: any = null;
 
     const connectWS = () => {
-      ws = new WebSocket("ws://localhost:8000/api/parking/ws");
+      ws = new WebSocket(`${WS_BASE_URL}/api/parking/ws`);
 
       ws.onmessage = (event) => {
         try {
@@ -224,7 +225,7 @@ export function HomePage() {
 
   useEffect(() => {
     const fetchAnn = () =>
-      fetch("http://localhost:8000/api/admin/announcements?active_only=true")
+      fetch(`${API_BASE_URL}/api/admin/announcements?active_only=true`)
         .then(r => r.ok ? r.json() : [])
         .then((data: LiveAnnouncement[]) => setAnnouncements(data))
         .catch(() => { /* keep previous */ });

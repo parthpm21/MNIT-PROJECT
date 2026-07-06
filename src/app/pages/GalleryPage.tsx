@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { API_BASE_URL } from "../config";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { ArrowLeft, X, ChevronLeft, ChevronRight, ZoomIn, Images } from "lucide-react";
 import logoImg from "../../imports/image-21.png";
@@ -55,7 +56,7 @@ export function GalleryPage() {
   const [backendItems, setBackendItems] = useState<GalleryItem[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/gallery")
+    fetch(`${API_BASE_URL}/api/gallery`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -63,7 +64,7 @@ export function GalleryPage() {
             .filter((d: any) => d.type === "photo")
             .map((d: any) => ({
               id: d.id + 10000,
-              url: "http://localhost:8000" + d.url,
+              url: API_BASE_URL + d.url,
               title: d.title,
               category: (d.category || "Temple") as Exclude<Category, "All">,
               photographer: d.photographer || "Admin",

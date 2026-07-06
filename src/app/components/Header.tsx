@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { API_BASE_URL } from "../config";
 import {
   Menu, X, Phone, MapPin, Shield, Heart,
   Car, ChevronDown, Landmark, Stethoscope, ClipboardList,
@@ -98,7 +99,7 @@ export function Header() {
 
   useEffect(() => {
     const fetchAnn = () =>
-      fetch("http://localhost:8000/api/admin/announcements?active_only=true")
+      fetch(`${API_BASE_URL}/api/admin/announcements?active_only=true`)
         .then(r => r.ok ? r.json() : [])
         .then((data: LiveAnnouncement[]) => setAnnouncements(data))
         .catch(() => { /* keep previous */ });

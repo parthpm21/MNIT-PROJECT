@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { API_BASE_URL } from "../config";
 import {
   X, User, Phone, Mail, Calendar, Clock, ShieldCheck,
   Ticket, HandCoins, Building2, Car,
@@ -22,7 +23,7 @@ const C = {
   red: "#DC2626",
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = API_BASE_URL;
 
 type Tab = "overview" | "bookings" | "donations" | "accommodation" | "sos" | "bhandara" | "medical" | "lost_found";
 

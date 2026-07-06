@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     # PostgreSQL
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/khatu_shyam_db"
 
+    # CORS Allowed Origins (comma-separated string)
+    allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
+
     # JWT
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"

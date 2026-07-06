@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { API_BASE_URL, WS_BASE_URL } from "../config";
 import { useNavigate } from "react-router";
 import {
   LayoutDashboard, IndianRupee, Users2, ClipboardList,
@@ -555,7 +556,7 @@ function EPass() {
   const loadInitialData = useCallback(async () => {
     try {
       setError("");
-      const res = await fetch("http://localhost:8000/api/gate/dashboard-data");
+      const res = await fetch(`${API_BASE_URL}/api/gate/dashboard-data`);
       if (!res.ok) throw new Error("Failed to load initial gate dashboard data");
       const data = await res.json();
       updateState(data);
@@ -580,7 +581,7 @@ function EPass() {
     loadInitialData();
 
     // Establish WebSocket Connection
-    const ws = new WebSocket("ws://localhost:8000/api/gate/ws/live-updates");
+    const ws = new WebSocket(`${WS_BASE_URL}/api/gate/ws/live-updates`);
 
     ws.onopen = () => {
       setWsConnected(true);
@@ -619,7 +620,7 @@ function EPass() {
     }
     setSavingSettings(true);
     try {
-      const res = await fetch("http://localhost:8000/api/gate/settings", {
+      const res = await fetch(`${API_BASE_URL}/api/gate/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ max_capacity: val })
@@ -686,7 +687,7 @@ function EPass() {
     setSimLoading(true);
     setSimMessage(null);
     try {
-      const res = await fetch("http://localhost:8000/api/gate/create-ticket", {
+      const res = await fetch(`${API_BASE_URL}/api/gate/create-ticket`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -714,7 +715,7 @@ function EPass() {
     setSimMessage(null);
     try {
       const endpoint = action === "entry" ? "entry-scan" : "exit-scan";
-      const res = await fetch(`http://localhost:8000/api/gate/${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}/api/gate/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ticket_id: simTicketId.trim() })
@@ -1971,7 +1972,7 @@ function LiveStatus() {
   useEffect(() => {
     const fetchCameraStatuses = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/cameras");
+        const res = await fetch(`${API_BASE_URL}/api/v1/cameras`);
         if (res.ok) {
           const data = await res.json();
           setCameras(prev => prev.map(c => {
@@ -1993,7 +1994,7 @@ function LiveStatus() {
   useEffect(() => {
     const fetchInference = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/inference");
+        const res = await fetch(`${API_BASE_URL}/api/v1/inference`);
         if (res.ok) {
           const data: { camera_id: string; crowd_count: number }[] = await res.json();
           setInferenceMap(
@@ -2064,10 +2065,10 @@ function LiveStatus() {
               src={activeCam.status === "offline" || activeCam.status === "error" || activeCam.status === "not_configured"
                 ? activeCam.img 
                 : viewMode === "overlay"
-                  ? `http://localhost:8000/api/v1/cameras/${activeCam.id}/overlay`
+                  ? `${API_BASE_URL}/api/v1/cameras/${activeCam.id}/overlay`
                   : viewMode === "heatmap"
-                    ? `http://localhost:8000/api/v1/cameras/${activeCam.id}/heatmap`
-                    : `http://localhost:8000/api/v1/cameras/${activeCam.id}/stream`
+                    ? `${API_BASE_URL}/api/v1/cameras/${activeCam.id}/heatmap`
+                    : `${API_BASE_URL}/api/v1/cameras/${activeCam.id}/stream`
               } 
               alt={activeCam.label} 
               className="w-full h-full object-cover opacity-85" 
@@ -2101,7 +2102,7 @@ function LiveStatus() {
                   src={
                     cam.status === "offline" || cam.status === "error" || cam.status === "not_configured"
                       ? cam.img
-                      : `http://localhost:8000/api/v1/cameras/${cam.id}/snapshot?t=${liveTime.getTime()}`
+                      : `${API_BASE_URL}/api/v1/cameras/${cam.id}/snapshot?t=${liveTime.getTime()}`
                   }
                   alt={cam.label}
                   className="w-full h-full object-cover"
@@ -2267,7 +2268,7 @@ function VideoAnalysis() {
 
     const pollInterval = setInterval(async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/video-analysis/status/${taskId}`);
+        const res = await fetch(`${API_BASE_URL}/api/v1/video-analysis/status/${taskId}`);
         if (res.ok) {
           const data = await res.json();
           setStatus(data.status);
@@ -2332,7 +2333,7 @@ function VideoAnalysis() {
     formData.append("mode", mode);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/video-analysis/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/video-analysis/upload`, {
         method: "POST",
         body: formData,
       });
@@ -2357,7 +2358,7 @@ function VideoAnalysis() {
   const cancelAnalysis = async () => {
     if (!taskId) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/video-analysis/cancel/${taskId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/video-analysis/cancel/${taskId}`, {
         method: "POST",
       });
       if (res.ok) {
@@ -2371,7 +2372,7 @@ function VideoAnalysis() {
   const deleteJob = async () => {
     if (!taskId) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/video-analysis/jobs/${taskId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/video-analysis/jobs/${taskId}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -2594,7 +2595,7 @@ function VideoAnalysis() {
                   <video
                     controls
                     className="w-full h-full max-h-[480px] object-contain"
-                    src={`http://localhost:8000/api/v1/video-analysis/static/task_${taskId}/overlay.mp4`}
+                    src={`${API_BASE_URL}/api/v1/video-analysis/static/task_${taskId}/overlay.mp4`}
                   />
                 </div>
               </div>
@@ -2609,7 +2610,7 @@ function VideoAnalysis() {
 
                 <div className="flex gap-2">
                   <a
-                    href={`http://localhost:8000/api/v1/video-analysis/downloads/${taskId}/video`}
+                    href={`${API_BASE_URL}/api/v1/video-analysis/downloads/${taskId}/video`}
                     download
                     className="px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-all"
                     style={{ backgroundColor: C.darkBlue }}
@@ -2617,7 +2618,7 @@ function VideoAnalysis() {
                     <Download size={13} /> Download Video
                   </a>
                   <a
-                    href={`http://localhost:8000/api/v1/video-analysis/downloads/${taskId}/csv`}
+                    href={`${API_BASE_URL}/api/v1/video-analysis/downloads/${taskId}/csv`}
                     download
                     className="px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-all"
                     style={{ backgroundColor: C.orange }}
@@ -2766,7 +2767,7 @@ function Announcements() {
     setAlertSending(true);
     setAlertError("");
     try {
-      const res = await fetch("http://localhost:8000/api/v1/alerts/send", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/alerts/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: alertMsg.trim(), severity: alertSev }),
@@ -3199,12 +3200,12 @@ function Gallery() {
               <div className="relative overflow-hidden" style={{ height: 160, backgroundColor: "#f3f4f6" }}>
                 {item.type === "photo" ? (
                   <img
-                    src={`http://localhost:8000${item.url}`}
+                    src={`${API_BASE_URL}${item.url}`}
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <video src={`http://localhost:8000${item.url}`} className="w-full h-full object-cover" />
+                  <video src={`${API_BASE_URL}${item.url}`} className="w-full h-full object-cover" />
                 )}
                 {/* Type badge */}
                 <div className="absolute top-2 left-2 text-white text-[10px] px-2 py-0.5 rounded-full uppercase font-bold"
@@ -3279,9 +3280,9 @@ function Gallery() {
               {editFilePreview ? (
                 <img src={editFilePreview} alt="New preview" className="w-full h-full object-cover" />
               ) : editItem.type === "photo" ? (
-                <img src={`http://localhost:8000${editItem.url}`} alt={editItem.title} className="w-full h-full object-cover" />
+                <img src={`${API_BASE_URL}${editItem.url}`} alt={editItem.title} className="w-full h-full object-cover" />
               ) : (
-                <video src={`http://localhost:8000${editItem.url}`} className="w-full h-full object-cover" />
+                <video src={`${API_BASE_URL}${editItem.url}`} className="w-full h-full object-cover" />
               )}
             </div>
 
@@ -3477,7 +3478,7 @@ function LostFoundSection() {
    SECTION: PARKING CONTROL (Loop Detector + Boom Barrier)
 ═══════════════════════════════════════════════════════════ */
 
-const WS_PARKING_URL = "ws://localhost:8000/api/parking/ws";
+const WS_PARKING_URL = `${WS_BASE_URL}/api/parking/ws`;
 
 function ParkingControl() {
   const [zones, setZones] = useState<ParkingZoneAdmin[]>([]);

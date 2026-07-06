@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { API_BASE_URL } from "../config";
 import { ArrowLeft, Video, Play, Clock, Eye } from "lucide-react";
 import logoImg from "../../imports/image-21.png";
 
@@ -47,7 +48,7 @@ export function GalleryVideosPage() {
   const [backendVideos, setBackendVideos] = useState<typeof VIDEOS>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/gallery")
+    fetch(`${API_BASE_URL}/api/gallery`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -60,7 +61,7 @@ export function GalleryVideosPage() {
               views: "0",
               thumb: "https://images.unsplash.com/photo-1605302977545-3a09913be1dd?auto=format&fit=crop&w=600&q=80", // default thumb
               tag: d.category || "Temple",
-              url: "http://localhost:8000" + d.url, // custom field if we want to play it
+              url: API_BASE_URL + d.url, // custom field if we want to play it
             }));
           setBackendVideos(mapped);
         }

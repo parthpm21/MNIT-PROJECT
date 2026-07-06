@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getParkingZones, type ParkingZone } from "../services/adminApi";
+import { WS_BASE_URL } from "../config";
 
 // ── Constants ─────────────────────────────────────────────
 const TEMPLE_LAT = 27.4465;
 const TEMPLE_LNG = 75.4005;
-const WS_URL = "ws://localhost:8000/api/parking/ws";
+const WS_URL = `${WS_BASE_URL}/api/parking/ws`;
 
 const VEHICLE_LABEL: Record<string, string> = {
   two_wheeler: "🏍️ Two Wheeler",

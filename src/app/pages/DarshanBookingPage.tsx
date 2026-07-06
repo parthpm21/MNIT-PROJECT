@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { API_BASE_URL } from "../config";
 import {
   ArrowLeft,
   CalendarDays,
@@ -554,7 +555,7 @@ export function DarshanBookingPage() {
         } : null,
       };
 
-      const res = await fetch("http://localhost:8000/api/bookings/create", {
+      const res = await fetch(`${API_BASE_URL}/api/bookings/create`, {
         method: "POST",
         headers,
         body: JSON.stringify(payload),

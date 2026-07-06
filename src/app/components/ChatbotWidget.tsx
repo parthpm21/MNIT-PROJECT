@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageSquare, Send, X, Languages, Bot, Sparkles, AlertCircle, ShieldAlert, Maximize2, Minimize2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { API_BASE_URL } from "../config";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE_URL = API_BASE_URL;
 
 interface Message {
   id: string;

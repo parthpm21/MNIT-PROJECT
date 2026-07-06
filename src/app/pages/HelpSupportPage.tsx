@@ -1,6 +1,6 @@
 import { useState } from "react";
-
 import { useNavigate } from "react-router";
+import { API_BASE_URL } from "../config";
 import {
   ArrowLeft, Search, Phone, Mail, MessageCircle, ShieldAlert,
   Calendar, CreditCard, HandCoins, Compass, FileBadge, Wrench,
@@ -214,7 +214,7 @@ export function HelpSupportPage() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8000/api/support/query", {
+      const res = await fetch(`${API_BASE_URL}/api/support/query`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,8 +3,9 @@
  * Typed client for all /api/admin/* backend endpoints.
  * Reads JWT token from localStorage for Authorization header.
  */
+import { API_BASE_URL } from '../config';
 
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = API_BASE_URL;
 
 // ── Types ────────────────────────────────────────────────
 
