@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { AlertTriangle, Info, XCircle, X, Bell } from "lucide-react";
+import { WS_BASE_URL } from "../config";
 
 /* ─── Types ──────────────────────────────────────────────── */
 interface AlertMsg {
@@ -57,10 +58,7 @@ export function AlertListener() {
 
   /* ── Connect / reconnect logic ─────────────────────────── */
   const connect = useCallback(() => {
-    // Determine WS URL from current page location
-    const proto = window.location.protocol === "https:" ? "wss" : "ws";
-    const host = window.location.hostname;
-    const wsUrl = `${proto}://${host}:8000/api/v1/alerts/ws`;
+    const wsUrl = `${WS_BASE_URL}/api/v1/alerts/ws`;
 
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
