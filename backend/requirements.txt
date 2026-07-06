@@ -19,3 +19,4 @@ ultralytics
 opencv-python-headless
 lwcc
 numpy
+websockets
